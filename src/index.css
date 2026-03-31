@@ -1,0 +1,56 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "DM Sans", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, monospace;
+
+  --color-surface-0: #1A1D23;
+  --color-surface-1: #22262E;
+  --color-surface-2: #2A2F38;
+  --color-surface-3: #353B47;
+
+  --color-accent: #3B82F6;
+  --color-accent-hover: #2563EB;
+  --color-warning: #F59E0B;
+  --color-danger: #EF4444;
+  --color-success: #22C55E;
+}
+
+body {
+  font-family: var(--font-sans);
+  background-color: var(--color-surface-0);
+  color: #F9FAFB;
+  margin: 0;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: var(--color-surface-1);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--color-surface-3);
+  border-radius: 3px;
+}
+
+/* Realtime flash animation */
+@keyframes realtime-flash {
+  0% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.6); }
+  50% { box-shadow: 0 0 8px 2px rgba(59, 130, 246, 0.4); }
+  100% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0); }
+}
+.realtime-flash {
+  animation: realtime-flash 0.8s ease-out;
+}
+
+/* Priority P1 pulse */
+@keyframes pulse-danger {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.6; }
+}
+.pulse-danger {
+  animation: pulse-danger 1.5s ease-in-out infinite;
+}
