@@ -121,6 +121,12 @@ export interface MachineOTGroup {
   totalHeures: number
 }
 
+export interface PDRDemandeur {
+  id: string
+  nom: string
+  created_at: string
+}
+
 // Column mapping for Excel import
 export interface ColumnMapping {
   numero_ot: string | null

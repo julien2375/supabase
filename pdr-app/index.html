@@ -1,0 +1,827 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Demande PDR — Trello</title>
+  <style>
+    :root {
+      --bg: #0b1020;
+      --surface: #131a2e;
+      --surface-2: #1b2340;
+      --surface-3: #2a3358;
+      --text: #f3f5fb;
+      --muted: #8a93b2;
+      --accent: #5b8bff;
+      --accent-hover: #7aa1ff;
+      --danger: #ef4444;
+      --danger-hover: #f87171;
+      --success: #10b981;
+      --border: #2a3358;
+    }
+    * { box-sizing: border-box; }
+    html, body {
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+    }
+    .app {
+      max-width: 640px;
+      margin: 0 auto;
+      padding: 32px 20px 80px;
+    }
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 28px;
+    }
+    header h1 {
+      margin: 0;
+      font-size: 22px;
+      font-weight: 600;
+      letter-spacing: -0.01em;
+    }
+    header .subtitle {
+      color: var(--muted);
+      font-size: 13px;
+      margin-top: 4px;
+    }
+    .icon-btn {
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      color: var(--text);
+      width: 38px;
+      height: 38px;
+      border-radius: 10px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.15s, border-color 0.15s;
+    }
+    .icon-btn:hover { background: var(--surface-3); border-color: var(--accent); }
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 24px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+    }
+    .field { margin-bottom: 18px; }
+    .field:last-child { margin-bottom: 0; }
+    label {
+      display: block;
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--muted);
+      margin-bottom: 6px;
+    }
+    label .req { color: var(--danger); margin-left: 2px; }
+    .input,
+    .number-input {
+      width: 100%;
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      color: var(--text);
+      border-radius: 10px;
+      padding: 11px 14px;
+      font-size: 14px;
+      outline: none;
+      transition: border-color 0.15s;
+      font-family: inherit;
+    }
+    .input::placeholder { color: var(--muted); }
+    .input:focus,
+    .number-input:focus { border-color: var(--accent); }
+    /* Searchable select */
+    .select-wrap { position: relative; }
+    .select-list {
+      position: absolute;
+      top: calc(100% + 4px);
+      left: 0;
+      right: 0;
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      max-height: 220px;
+      overflow-y: auto;
+      z-index: 50;
+      box-shadow: 0 12px 32px rgba(0, 0, 0, 0.4);
+    }
+    .select-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 14px;
+      cursor: pointer;
+      font-size: 14px;
+      border-bottom: 1px solid var(--border);
+    }
+    .select-item:last-child { border-bottom: none; }
+    .select-item:hover { background: var(--surface-3); }
+    .select-item .label-main { font-weight: 500; }
+    .select-item .label-sub { font-size: 12px; color: var(--muted); margin-top: 2px; }
+    .select-item .trash {
+      background: transparent;
+      border: none;
+      color: var(--muted);
+      cursor: pointer;
+      padding: 4px;
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+    }
+    .select-item .trash:hover { color: var(--danger); background: rgba(239, 68, 68, 0.08); }
+    .select-item.add {
+      color: var(--accent);
+      font-weight: 500;
+    }
+    .toggle-group {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+    .toggle-btn {
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 11px 14px;
+      border-radius: 10px;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 500;
+      transition: background 0.15s, border-color 0.15s;
+    }
+    .toggle-btn:hover { background: var(--surface-3); }
+    .toggle-btn.active.danger {
+      background: var(--danger);
+      border-color: var(--danger);
+    }
+    .toggle-btn.active.success {
+      background: var(--success);
+      border-color: var(--success);
+    }
+    .actions {
+      display: flex;
+      gap: 10px;
+      margin-top: 26px;
+    }
+    .btn {
+      flex: 1;
+      padding: 12px 18px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      background: var(--surface-2);
+      color: var(--text);
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.15s, border-color 0.15s, transform 0.05s;
+      font-family: inherit;
+    }
+    .btn:hover { background: var(--surface-3); }
+    .btn.primary {
+      background: var(--accent);
+      border-color: var(--accent);
+    }
+    .btn.primary:hover { background: var(--accent-hover); border-color: var(--accent-hover); }
+    .btn.primary:disabled,
+    .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+    .alert {
+      padding: 12px 14px;
+      border-radius: 10px;
+      font-size: 13px;
+      margin-bottom: 16px;
+    }
+    .alert.error {
+      background: rgba(239, 68, 68, 0.1);
+      border: 1px solid rgba(239, 68, 68, 0.3);
+      color: var(--danger-hover);
+    }
+    .alert.success {
+      background: rgba(16, 185, 129, 0.1);
+      border: 1px solid rgba(16, 185, 129, 0.3);
+      color: #34d399;
+    }
+    .alert.warn {
+      background: rgba(245, 158, 11, 0.1);
+      border: 1px solid rgba(245, 158, 11, 0.3);
+      color: #fbbf24;
+    }
+    .alert a { color: inherit; text-decoration: underline; }
+    /* Modal */
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.6);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      z-index: 100;
+    }
+    .modal {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      max-width: 560px;
+      width: 100%;
+      max-height: 90vh;
+      overflow-y: auto;
+      padding: 24px;
+    }
+    .modal h2 {
+      margin: 0 0 4px;
+      font-size: 18px;
+    }
+    .modal .modal-sub {
+      color: var(--muted);
+      font-size: 13px;
+      margin-bottom: 20px;
+    }
+    .section {
+      margin-top: 24px;
+      padding-top: 20px;
+      border-top: 1px solid var(--border);
+    }
+    .section h3 {
+      margin: 0 0 12px;
+      font-size: 14px;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: var(--muted);
+    }
+    .row {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 8px;
+    }
+    .row .input { flex: 1; }
+    .list {
+      list-style: none;
+      padding: 0;
+      margin: 8px 0 0;
+      max-height: 200px;
+      overflow-y: auto;
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+    }
+    .list li {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 14px;
+      font-size: 14px;
+      border-bottom: 1px solid var(--border);
+    }
+    .list li:last-child { border-bottom: none; }
+    .list li .meta { color: var(--muted); font-size: 12px; }
+    .list .empty { color: var(--muted); font-style: italic; padding: 14px; text-align: center; }
+    .list .trash {
+      background: transparent;
+      border: none;
+      color: var(--muted);
+      cursor: pointer;
+      padding: 4px;
+      border-radius: 6px;
+    }
+    .list .trash:hover { color: var(--danger); background: rgba(239, 68, 68, 0.08); }
+    .help {
+      font-size: 12px;
+      color: var(--muted);
+      margin-top: 6px;
+      line-height: 1.5;
+    }
+    .help a { color: var(--accent); }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <header>
+      <div>
+        <h1>Demande de PDR</h1>
+        <div class="subtitle">Pousse une carte vers Trello</div>
+      </div>
+      <button id="settings-btn" class="icon-btn" title="Paramètres" aria-label="Paramètres">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+      </button>
+    </header>
+
+    <div id="config-warning"></div>
+
+    <div class="card">
+      <div id="form-alert"></div>
+      <form id="pdr-form" autocomplete="off">
+        <div class="field">
+          <label>Nom de la machine <span class="req">*</span></label>
+          <div class="select-wrap" data-select="machine">
+            <input type="text" class="input" id="machine-input" placeholder="Rechercher une machine…" />
+          </div>
+        </div>
+
+        <div class="field">
+          <label>Désignation de la pièce <span class="req">*</span></label>
+          <input type="text" class="input" id="designation-input" placeholder="Ex : Roulement à billes 6204-2RS" />
+        </div>
+
+        <div class="field">
+          <label>Référence de la pièce</label>
+          <input type="text" class="input" id="reference-input" placeholder="Optionnel — référence fournisseur" />
+        </div>
+
+        <div class="field">
+          <label>Quantité <span class="req">*</span></label>
+          <input type="number" min="1" step="1" class="number-input" id="quantite-input" value="1" />
+        </div>
+
+        <div class="field">
+          <label>Demandeur <span class="req">*</span></label>
+          <div class="select-wrap" data-select="demandeur">
+            <input type="text" class="input" id="demandeur-input" placeholder="Rechercher ou ajouter un demandeur…" />
+          </div>
+        </div>
+
+        <div class="field">
+          <label>Machine à l'arrêt <span class="req">*</span></label>
+          <div class="toggle-group">
+            <button type="button" class="toggle-btn" data-arret="true">Oui — à l'arrêt</button>
+            <button type="button" class="toggle-btn" data-arret="false">Non — en marche</button>
+          </div>
+        </div>
+
+        <div class="actions">
+          <button type="button" class="btn" id="reset-btn">Réinitialiser</button>
+          <button type="submit" class="btn primary" id="submit-btn">Envoyer à Trello</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Settings modal -->
+  <div id="settings-modal" class="modal-backdrop" style="display: none;">
+    <div class="modal">
+      <h2>Paramètres</h2>
+      <div class="modal-sub">Toutes les données sont stockées localement dans votre navigateur.</div>
+
+      <div class="section" style="margin-top:0;border:none;padding:0;">
+        <h3>Trello</h3>
+        <div class="field">
+          <label>API Key</label>
+          <input type="text" class="input" id="set-key" placeholder="df7b65ec…" />
+        </div>
+        <div class="field">
+          <label>Token</label>
+          <input type="text" class="input" id="set-token" placeholder="ATTAd9…" />
+        </div>
+        <div class="field">
+          <label>List ID</label>
+          <input type="text" class="input" id="set-list" placeholder="692eb3c4b935e22016488263" />
+        </div>
+        <div class="help">
+          Récupérer key et token via <a href="https://trello.com/power-ups/admin" target="_blank" rel="noopener">trello.com/power-ups/admin</a>. Le List ID se trouve en ajoutant <code>.json</code> à l'URL d'un board.
+        </div>
+      </div>
+
+      <div class="section">
+        <h3>Machines</h3>
+        <div class="row">
+          <input type="text" class="input" id="new-machine-tag" placeholder="Tag (ex: M-001)" />
+          <input type="text" class="input" id="new-machine-desc" placeholder="Désignation" />
+          <button type="button" class="btn" id="add-machine-btn" style="flex:0 0 auto;">Ajouter</button>
+        </div>
+        <ul class="list" id="machines-list"></ul>
+      </div>
+
+      <div class="section">
+        <h3>Demandeurs</h3>
+        <div class="row">
+          <input type="text" class="input" id="new-demandeur" placeholder="Nom du demandeur" />
+          <button type="button" class="btn" id="add-demandeur-btn" style="flex:0 0 auto;">Ajouter</button>
+        </div>
+        <ul class="list" id="demandeurs-list"></ul>
+      </div>
+
+      <div class="actions">
+        <button type="button" class="btn" id="settings-close-btn">Fermer</button>
+        <button type="button" class="btn primary" id="settings-save-btn">Enregistrer</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // ---------- Storage ----------
+    const STORAGE = {
+      key: 'pdr.trello.key',
+      token: 'pdr.trello.token',
+      list: 'pdr.trello.listId',
+      machines: 'pdr.machines',
+      demandeurs: 'pdr.demandeurs',
+    };
+    const load = (k, fb) => {
+      try {
+        const v = localStorage.getItem(k);
+        if (v == null) return fb;
+        return JSON.parse(v);
+      } catch (_) { return fb; }
+    };
+    const save = (k, v) => localStorage.setItem(k, JSON.stringify(v));
+
+    let trello = {
+      key: load(STORAGE.key, ''),
+      token: load(STORAGE.token, ''),
+      listId: load(STORAGE.list, ''),
+    };
+    let machines = load(STORAGE.machines, []); // [{id, tag, designation}]
+    let demandeurs = load(STORAGE.demandeurs, []); // [{id, nom}]
+
+    // ---------- Form state ----------
+    const state = {
+      machineId: null,
+      demandeurId: null,
+      machineArret: null,
+      submitting: false,
+    };
+
+    // ---------- DOM helpers ----------
+    const $ = (sel) => document.querySelector(sel);
+    const $$ = (sel) => Array.from(document.querySelectorAll(sel));
+    const uid = () => 'id-' + Math.random().toString(36).slice(2, 10);
+
+    // ---------- Config warning ----------
+    function renderConfigWarning() {
+      const el = $('#config-warning');
+      if (trello.key && trello.token && trello.listId) {
+        el.innerHTML = '';
+        return;
+      }
+      el.innerHTML = `<div class="alert warn">⚙️ Trello n'est pas configuré. Cliquez sur <strong>Paramètres</strong> en haut à droite pour saisir vos clés API.</div>`;
+    }
+
+    // ---------- Searchable select ----------
+    function setupSelect(kind) {
+      const wrap = document.querySelector(`[data-select="${kind}"]`);
+      const input = wrap.querySelector('input');
+      let listEl = null;
+      let open = false;
+
+      const close = () => {
+        if (listEl) { listEl.remove(); listEl = null; }
+        open = false;
+      };
+
+      const render = () => {
+        if (!open) return;
+        if (listEl) listEl.remove();
+        listEl = document.createElement('div');
+        listEl.className = 'select-list';
+
+        const q = input.value.trim().toLowerCase();
+        let items;
+        if (kind === 'machine') {
+          items = machines
+            .filter(m => !q || m.tag.toLowerCase().includes(q) || (m.designation || '').toLowerCase().includes(q))
+            .map(m => ({ id: m.id, label: m.tag, sub: m.designation || '' }));
+        } else {
+          items = demandeurs
+            .filter(d => !q || d.nom.toLowerCase().includes(q))
+            .map(d => ({ id: d.id, label: d.nom, sub: '' }));
+        }
+
+        if (items.length === 0 && !q) {
+          const empty = document.createElement('div');
+          empty.className = 'select-item';
+          empty.style.color = 'var(--muted)';
+          empty.style.fontStyle = 'italic';
+          empty.textContent = kind === 'machine'
+            ? 'Aucune machine — ajoutez-en via Paramètres.'
+            : 'Aucun demandeur — tapez un nom pour en ajouter un.';
+          listEl.appendChild(empty);
+        }
+
+        items.forEach(it => {
+          const row = document.createElement('div');
+          row.className = 'select-item';
+          const left = document.createElement('div');
+          const main = document.createElement('div');
+          main.className = 'label-main';
+          main.textContent = it.label;
+          left.appendChild(main);
+          if (it.sub) {
+            const sub = document.createElement('div');
+            sub.className = 'label-sub';
+            sub.textContent = it.sub;
+            left.appendChild(sub);
+          }
+          row.appendChild(left);
+
+          if (kind === 'demandeur') {
+            const trash = document.createElement('button');
+            trash.type = 'button';
+            trash.className = 'trash';
+            trash.title = 'Supprimer';
+            trash.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2"/></svg>';
+            trash.onclick = (e) => {
+              e.stopPropagation();
+              demandeurs = demandeurs.filter(d => d.id !== it.id);
+              save(STORAGE.demandeurs, demandeurs);
+              if (state.demandeurId === it.id) {
+                state.demandeurId = null;
+                input.value = '';
+              }
+              render();
+              renderSettingsLists();
+            };
+            row.appendChild(trash);
+          }
+
+          row.onclick = () => {
+            if (kind === 'machine') {
+              state.machineId = it.id;
+              input.value = it.label;
+            } else {
+              state.demandeurId = it.id;
+              input.value = it.label;
+            }
+            close();
+          };
+          listEl.appendChild(row);
+        });
+
+        // Add new (demandeur only)
+        if (kind === 'demandeur' && q) {
+          const exists = demandeurs.some(d => d.nom.toLowerCase() === q);
+          if (!exists) {
+            const row = document.createElement('div');
+            row.className = 'select-item add';
+            row.textContent = `+ Ajouter « ${input.value.trim()} »`;
+            row.onclick = () => {
+              const nom = input.value.trim();
+              const newD = { id: uid(), nom };
+              demandeurs.push(newD);
+              demandeurs.sort((a, b) => a.nom.localeCompare(b.nom));
+              save(STORAGE.demandeurs, demandeurs);
+              state.demandeurId = newD.id;
+              input.value = nom;
+              close();
+              renderSettingsLists();
+            };
+            listEl.appendChild(row);
+          }
+        }
+
+        wrap.appendChild(listEl);
+      };
+
+      input.addEventListener('focus', () => { open = true; render(); });
+      input.addEventListener('input', () => {
+        // Clear current selection if user types something different
+        if (kind === 'machine') {
+          const cur = machines.find(m => m.id === state.machineId);
+          if (!cur || cur.tag !== input.value) state.machineId = null;
+        } else {
+          const cur = demandeurs.find(d => d.id === state.demandeurId);
+          if (!cur || cur.nom !== input.value) state.demandeurId = null;
+        }
+        open = true;
+        render();
+      });
+      document.addEventListener('mousedown', (e) => {
+        if (!wrap.contains(e.target)) close();
+      });
+
+      return {
+        reset: () => { input.value = ''; close(); },
+        sync: () => {
+          if (kind === 'machine') {
+            const m = machines.find(x => x.id === state.machineId);
+            input.value = m ? m.tag : '';
+          } else {
+            const d = demandeurs.find(x => x.id === state.demandeurId);
+            input.value = d ? d.nom : '';
+          }
+        },
+      };
+    }
+
+    const machineSelect = setupSelect('machine');
+    const demandeurSelect = setupSelect('demandeur');
+
+    // ---------- Toggle "machine arret" ----------
+    function setArret(val) {
+      state.machineArret = val;
+      $$('.toggle-btn[data-arret]').forEach(btn => {
+        const isActive = btn.dataset.arret === String(val);
+        btn.classList.toggle('active', isActive);
+        btn.classList.toggle('danger', isActive && val === true);
+        btn.classList.toggle('success', isActive && val === false);
+      });
+    }
+    $$('.toggle-btn[data-arret]').forEach(btn => {
+      btn.addEventListener('click', () => setArret(btn.dataset.arret === 'true'));
+    });
+
+    // ---------- Reset ----------
+    function resetForm() {
+      state.machineId = null;
+      state.demandeurId = null;
+      state.machineArret = null;
+      $('#designation-input').value = '';
+      $('#reference-input').value = '';
+      $('#quantite-input').value = '1';
+      machineSelect.reset();
+      demandeurSelect.reset();
+      $$('.toggle-btn[data-arret]').forEach(b => b.classList.remove('active', 'danger', 'success'));
+      $('#form-alert').innerHTML = '';
+    }
+    $('#reset-btn').addEventListener('click', resetForm);
+
+    // ---------- Submit ----------
+    function showAlert(type, msg) {
+      $('#form-alert').innerHTML = `<div class="alert ${type}">${msg}</div>`;
+    }
+
+    async function sendToTrello(payload) {
+      const url = new URL('https://api.trello.com/1/cards');
+      url.searchParams.set('key', trello.key);
+      url.searchParams.set('token', trello.token);
+      url.searchParams.set('idList', trello.listId);
+      url.searchParams.set('name', payload.name);
+      url.searchParams.set('desc', payload.desc);
+      url.searchParams.set('pos', 'top');
+      const res = await fetch(url.toString(), { method: 'POST' });
+      if (!res.ok) {
+        const text = await res.text().catch(() => '');
+        throw new Error(`Trello a renvoyé ${res.status} ${res.statusText}${text ? ' — ' + text : ''}`);
+      }
+      return res.json();
+    }
+
+    $('#pdr-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      $('#form-alert').innerHTML = '';
+
+      if (!trello.key || !trello.token || !trello.listId) {
+        showAlert('error', 'Trello n\'est pas configuré. Ouvrez les paramètres.');
+        return;
+      }
+      const machine = machines.find(m => m.id === state.machineId);
+      if (!machine) { showAlert('error', 'Sélectionnez une machine.'); return; }
+      const designation = $('#designation-input').value.trim();
+      if (!designation) { showAlert('error', 'La désignation de la pièce est obligatoire.'); return; }
+      const reference = $('#reference-input').value.trim();
+      const quantite = parseInt($('#quantite-input').value, 10);
+      if (!quantite || quantite < 1) { showAlert('error', 'La quantité doit être un entier ≥ 1.'); return; }
+      const demandeur = demandeurs.find(d => d.id === state.demandeurId);
+      if (!demandeur) { showAlert('error', 'Sélectionnez ou ajoutez un demandeur.'); return; }
+      if (state.machineArret === null) { showAlert('error', 'Indiquez si la machine est à l\'arrêt.'); return; }
+
+      const desc = [
+        `**Machine** : ${machine.tag}${machine.designation ? ' — ' + machine.designation : ''}`,
+        `**Pièce** : ${designation}`,
+        reference ? `**Référence** : ${reference}` : '**Référence** : _non communiquée_',
+        `**Quantité** : ${quantite}`,
+        `**Demandeur** : ${demandeur.nom}`,
+        `**Machine à l'arrêt** : ${state.machineArret ? 'OUI' : 'Non'}`,
+        '',
+        `_Demande créée le ${new Date().toLocaleString('fr-FR')}_`,
+      ].join('\n');
+
+      const name = `PDR — ${machine.tag} — ${designation}`;
+
+      state.submitting = true;
+      $('#submit-btn').disabled = true;
+      $('#submit-btn').textContent = 'Envoi…';
+
+      try {
+        await sendToTrello({ name, desc });
+        showAlert('success', '✓ Carte créée dans Trello.');
+        resetForm();
+      } catch (err) {
+        showAlert('error', 'Erreur Trello : ' + (err.message || err));
+      } finally {
+        state.submitting = false;
+        $('#submit-btn').disabled = false;
+        $('#submit-btn').textContent = 'Envoyer à Trello';
+      }
+    });
+
+    // ---------- Settings modal ----------
+    const modal = $('#settings-modal');
+    function openSettings() {
+      $('#set-key').value = trello.key;
+      $('#set-token').value = trello.token;
+      $('#set-list').value = trello.listId;
+      renderSettingsLists();
+      modal.style.display = 'flex';
+    }
+    function closeSettings() { modal.style.display = 'none'; }
+    $('#settings-btn').addEventListener('click', openSettings);
+    $('#settings-close-btn').addEventListener('click', closeSettings);
+    modal.addEventListener('click', (e) => { if (e.target === modal) closeSettings(); });
+
+    $('#settings-save-btn').addEventListener('click', () => {
+      trello.key = $('#set-key').value.trim();
+      trello.token = $('#set-token').value.trim();
+      trello.listId = $('#set-list').value.trim();
+      save(STORAGE.key, trello.key);
+      save(STORAGE.token, trello.token);
+      save(STORAGE.list, trello.listId);
+      renderConfigWarning();
+      closeSettings();
+    });
+
+    function renderSettingsLists() {
+      // Machines
+      const ml = $('#machines-list');
+      ml.innerHTML = '';
+      if (machines.length === 0) {
+        ml.innerHTML = '<li class="empty">Aucune machine</li>';
+      } else {
+        machines.forEach(m => {
+          const li = document.createElement('li');
+          const left = document.createElement('div');
+          left.innerHTML = `<strong>${escapeHtml(m.tag)}</strong>${m.designation ? ` <span class="meta">— ${escapeHtml(m.designation)}</span>` : ''}`;
+          const trash = document.createElement('button');
+          trash.type = 'button';
+          trash.className = 'trash';
+          trash.title = 'Supprimer';
+          trash.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>';
+          trash.onclick = () => {
+            machines = machines.filter(x => x.id !== m.id);
+            save(STORAGE.machines, machines);
+            if (state.machineId === m.id) { state.machineId = null; machineSelect.reset(); }
+            renderSettingsLists();
+          };
+          li.appendChild(left);
+          li.appendChild(trash);
+          ml.appendChild(li);
+        });
+      }
+
+      // Demandeurs
+      const dl = $('#demandeurs-list');
+      dl.innerHTML = '';
+      if (demandeurs.length === 0) {
+        dl.innerHTML = '<li class="empty">Aucun demandeur</li>';
+      } else {
+        demandeurs.forEach(d => {
+          const li = document.createElement('li');
+          const left = document.createElement('div');
+          left.textContent = d.nom;
+          const trash = document.createElement('button');
+          trash.type = 'button';
+          trash.className = 'trash';
+          trash.title = 'Supprimer';
+          trash.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>';
+          trash.onclick = () => {
+            demandeurs = demandeurs.filter(x => x.id !== d.id);
+            save(STORAGE.demandeurs, demandeurs);
+            if (state.demandeurId === d.id) { state.demandeurId = null; demandeurSelect.reset(); }
+            renderSettingsLists();
+          };
+          li.appendChild(left);
+          li.appendChild(trash);
+          dl.appendChild(li);
+        });
+      }
+    }
+
+    $('#add-machine-btn').addEventListener('click', () => {
+      const tag = $('#new-machine-tag').value.trim();
+      const desc = $('#new-machine-desc').value.trim();
+      if (!tag) return;
+      machines.push({ id: uid(), tag, designation: desc });
+      machines.sort((a, b) => a.tag.localeCompare(b.tag));
+      save(STORAGE.machines, machines);
+      $('#new-machine-tag').value = '';
+      $('#new-machine-desc').value = '';
+      renderSettingsLists();
+    });
+
+    $('#add-demandeur-btn').addEventListener('click', () => {
+      const nom = $('#new-demandeur').value.trim();
+      if (!nom) return;
+      if (demandeurs.some(d => d.nom.toLowerCase() === nom.toLowerCase())) return;
+      demandeurs.push({ id: uid(), nom });
+      demandeurs.sort((a, b) => a.nom.localeCompare(b.nom));
+      save(STORAGE.demandeurs, demandeurs);
+      $('#new-demandeur').value = '';
+      renderSettingsLists();
+    });
+
+    function escapeHtml(s) {
+      return String(s).replace(/[&<>"']/g, c => ({
+        '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+      }[c]));
+    }
+
+    // ---------- Init ----------
+    renderConfigWarning();
+  </script>
+</body>
+</html>

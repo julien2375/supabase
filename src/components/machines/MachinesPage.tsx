@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Plus, Pencil, Trash2, Flame } from 'lucide-react'
+import { Plus, Pencil, Trash2, Flame, PackagePlus } from 'lucide-react'
 import { useMachines, useDisponibilites } from '../../hooks/useMachines'
 import type { Machine } from '../../lib/types'
 import { CRITICITE_COLORS } from '../../lib/types'
@@ -7,6 +7,7 @@ import Badge from '../ui/Badge'
 import Button from '../ui/Button'
 import MachineForm from './MachineForm'
 import DisponibiliteTimeline from './DisponibiliteTimeline'
+import PDRRequestForm from './PDRRequestForm'
 
 export default function MachinesPage() {
   const { machines, loading, create, update, remove } = useMachines()
@@ -14,6 +15,7 @@ export default function MachinesPage() {
   const [showForm, setShowForm] = useState(false)
   const [editingMachine, setEditingMachine] = useState<Machine | null>(null)
   const [expandedId, setExpandedId] = useState<string | null>(null)
+  const [pdrMachineId, setPdrMachineId] = useState<string | null>(null)
 
   if (loading) {
     return <div className="text-gray-500 text-center py-12">Chargement des machines...</div>
@@ -67,6 +69,16 @@ export default function MachinesPage() {
                   <button
                     onClick={(e) => {
                       e.stopPropagation()
+                      setPdrMachineId(machine.id)
+                    }}
+                    className="p-1 text-gray-500 hover:text-accent"
+                    title="Demander une PDR"
+                  >
+                    <PackagePlus size={14} />
+                  </button>
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation()
                       setEditingMachine(machine)
                     }}
                     className="p-1 text-gray-500 hover:text-gray-300"
@@ -114,6 +126,15 @@ export default function MachinesPage() {
           onClose={() => setEditingMachine(null)}
           initial={editingMachine}
           onSubmit={async (m) => { await update(editingMachine.id, m) }}
+        />
+      )}
+
+      {pdrMachineId && (
+        <PDRRequestForm
+          open={!!pdrMachineId}
+          onClose={() => setPdrMachineId(null)}
+          machines={machines}
+          initialMachineId={pdrMachineId}
         />
       )}
     </div>

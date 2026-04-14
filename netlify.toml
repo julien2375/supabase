@@ -1,0 +1,10 @@
+[build]
+  command = "npm run build"
+  publish = "dist"
+
+# SPA fallback : toutes les routes inconnues (ex: /machines, /planning, /backlog)
+# servent index.html pour que React Router puisse prendre le relais côté client.
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
